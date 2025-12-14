@@ -1,10 +1,22 @@
 ---
-import Layout from '../layouts/Layout.astro';
 import IconManager from '../components/IconManager';
+import { getIcons } from '../utils/iconLoader';
+
+const icons = getIcons();
 ---
 
-<Layout title="Icon Manager">
-	<main>
-		<IconManager client:load />
-	</main>
-</Layout>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="generator" content={Astro.generator} />
+		<title>Icon Manager</title>
+	</head>
+	<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto py-8">
+      <h1 class="text-3xl font-bold text-center mb-8">Icon Manager</h1>
+      <IconManager client:load icons={icons} />
+    </div>
+	</body>
+</html>
