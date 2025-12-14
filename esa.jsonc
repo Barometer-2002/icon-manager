@@ -1,19 +1,9 @@
 {
   "name": "icon-manager",
-  "entry": "dist/server/entry.mjs",
   "installCommand": "npm install",
   "buildCommand": "npm run build",
   "assets": {
-    "directory": "dist/client",
+    "directory": "dist",
     "notFoundStrategy": "404Page"
-  },
-  "platform": "node",
-  "external": [
-    "fs",
-    "path",
-    "node:fs",
-    "node:path",
-    "fs/promises",
-    "node:fs/promises"
-  ]
+  }
 }
