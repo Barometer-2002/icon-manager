@@ -5,11 +5,12 @@ import { ICONS_DIR } from '../../../consts';
 import { updateIconMeta } from '../../../utils/db';
 import { getFiles } from '../../../utils/scanner';
 
-import { isAuthenticated } from '../../../utils/auth';
+import { getSessionUser } from '../../../utils/auth';
 
 export const DELETE: APIRoute = async (context) => {
-  if (!isAuthenticated(context)) {
-    return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
+  const sessionUser = await getSessionUser(context);
+  if (!sessionUser || sessionUser.role !== 'admin') {
+    return new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403 });
   }
   const { params } = context;
   const id = params.id;
@@ -24,7 +25,7 @@ export const DELETE: APIRoute = async (context) => {
 
   try {
     await fs.unlink(absolutePath);
-    await getFiles(true); // Refresh cache
+    await getFiles(true);
     return new Response(JSON.stringify({ success: true }), {
       headers: { 'Content-Type': 'application/json' }
     });
@@ -34,8 +35,9 @@ export const DELETE: APIRoute = async (context) => {
 };
 
 export const PUT: APIRoute = async (context) => {
-  if (!isAuthenticated(context)) {
-    return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
+  const sessionUser = await getSessionUser(context);
+  if (!sessionUser || sessionUser.role !== 'admin') {
+    return new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403 });
   }
   const { request, params } = context;
   const id = params.id;
@@ -45,15 +47,7 @@ export const PUT: APIRoute = async (context) => {
     const body = await request.json();
     const { tags } = body;
 
-    // We only update metadata in DB, we don't rename file for now
     await updateIconMeta(id, { tags });
-    
-    // We might want to trigger a cache refresh if we stored tags in cache, 
-    // but our getIcons function reads DB on every request for tags, so it's fine.
-    // However, searching relies on filtering. The scanner currently reads DB.
-    // So we should strictly speaking refresh or just rely on next request reading DB.
-    // The scanner.ts:getIcons reads DB fresh every time for tags mapping, so it's fine.
-
     return new Response(JSON.stringify({ success: true }), {
       headers: { 'Content-Type': 'application/json' }
     });

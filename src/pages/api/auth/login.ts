@@ -1,30 +1,52 @@
 import type { APIRoute } from 'astro';
-import { SESSION_COOKIE, getAdminPassword } from '../../../utils/auth';
+import { SESSION_COOKIE, ensureAdminUser, verifyPassword } from '../../../utils/auth';
+import { getDB } from '../../../utils/db';
 
 export const POST: APIRoute = async ({ request, cookies }) => {
   try {
     const body = await request.json();
-    const { password } = body;
-    const adminPassword = getAdminPassword();
+    const { username, password } = body;
 
-    if (password === adminPassword) {
-      cookies.set(SESSION_COOKIE, adminPassword, {
-        path: '/',
-        httpOnly: true,
-        sameSite: 'lax',
-        maxAge: 60 * 60 * 24 * 7 // 7 days
-      });
-      return new Response(JSON.stringify({ success: true }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    } else {
-      return new Response(JSON.stringify({ error: 'Invalid password' }), {
-        status: 401,
-        headers: { 'Content-Type': 'application/json' }
+    if (!username || !password) {
+      return new Response(JSON.stringify({ error: '用户名和密码必填' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
       });
     }
-  } catch (e) {
+
+    await ensureAdminUser();
+    const db = await getDB();
+    const user = db.users[username];
+
+    if (!user || !verifyPassword(password, user)) {
+      return new Response(JSON.stringify({ error: '用户名或密码错误' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    cookies.set(SESSION_COOKIE, user.username, {
+      path: '/',
+      httpOnly: true,
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7,
+    });
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        user: {
+          username: user.username,
+          role: user.role,
+          approved: user.approved,
+        },
+      }),
+      {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
+  } catch {
     return new Response(JSON.stringify({ error: 'Server error' }), { status: 500 });
   }
 };

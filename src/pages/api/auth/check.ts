@@ -1,9 +1,22 @@
 import type { APIRoute } from 'astro';
-import { isAuthenticated } from '../../../utils/auth';
+import { ensureAdminUser, getSessionUser } from '../../../utils/auth';
 
 export const GET: APIRoute = async (context) => {
-  const loggedIn = isAuthenticated(context);
-  return new Response(JSON.stringify({ loggedIn }), {
-    headers: { 'Content-Type': 'application/json' }
-  });
+  await ensureAdminUser();
+  const user = await getSessionUser(context);
+  return new Response(
+    JSON.stringify({
+      loggedIn: !!user,
+      user: user
+        ? {
+            username: user.username,
+            role: user.role,
+            approved: user.approved,
+          }
+        : null,
+    }),
+    {
+      headers: { 'Content-Type': 'application/json' },
+    },
+  );
 };

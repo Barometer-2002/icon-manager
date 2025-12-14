@@ -100,7 +100,8 @@ export async function getIcons(page = 1, limit = 50, search = '', category = '')
       path: f.relativePath,
       url: `/api/image/${f.relativePath}`,
       tags: meta.tags || [],
-      mtime: f.mtime
+      mtime: f.mtime,
+      uploadedBy: meta.uploadedBy || undefined
     };
   });
 

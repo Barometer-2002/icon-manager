@@ -4,7 +4,8 @@ import { ICONS_DIR, ALLOWED_EXTENSIONS, CATEGORY_MAP } from '../../../consts';
 import path from 'path';
 import fs from 'fs/promises';
 
-import { isAuthenticated } from '../../../utils/auth';
+import { getSessionUser } from '../../../utils/auth';
+import { updateIconMeta } from '../../../utils/db';
 
 export const GET: APIRoute = async ({ request }) => {
   const url = new URL(request.url);
@@ -41,14 +42,22 @@ export const OPTIONS: APIRoute = async () => {
 };
 
 export const POST: APIRoute = async (context) => {
-  if (!isAuthenticated(context)) {
-    return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
-  }
-  const { request } = context;
   try {
+    const sessionUser = await getSessionUser(context);
+    if (!sessionUser) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
+    }
+    if (!sessionUser.approved) {
+      return new Response(JSON.stringify({ error: '未获管理员授权，不能上传' }), {
+        status: 403,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    const { request } = context;
     const formData = await request.formData();
     const file = formData.get('file') as File;
-    const category = formData.get('category') as string || 'icon'; // Default to icon if not provided
+    const category = (formData.get('category') as string) || 'icon';
     
     if (!file) {
       return new Response(JSON.stringify({ error: 'No file uploaded' }), { status: 400 });
@@ -73,22 +82,24 @@ export const POST: APIRoute = async (context) => {
     }
 
     const filePath = path.join(targetDir, file.name);
-    
-    // Check if file exists to avoid overwrite? For now, we allow overwrite or maybe append timestamp
-    // Let's simple check
-    let finalPath = filePath;
-    let finalName = file.name;
-    
-    // Simple logic to avoid overwrite: append timestamp if exists
-    // (omitted for brevity, assume overwrite is okay or user manages it)
-    
+
+    const finalPath = filePath;
+
     await fs.writeFile(finalPath, Buffer.from(buffer));
-    
-    // Refresh cache
+
+    const relativePath = path.relative(ICONS_DIR, finalPath).replace(/\\/g, '/');
+
+    await updateIconMeta(relativePath, {
+      tags: [],
+      category,
+      createdAt: Date.now(),
+      uploadedBy: sessionUser.username,
+    });
+
     await getFiles(true);
 
     return new Response(JSON.stringify({ success: true, message: 'File uploaded' }), {
-      headers: { 'Content-Type': 'application/json' }
+      headers: { 'Content-Type': 'application/json' },
     });
   } catch (e) {
     console.error(e);

@@ -1,3 +1,35 @@
 {
-  "icons": {}
+  "icons": {
+    "card/僧侣.png": {
+      "tags": [],
+      "category": "card",
+      "createdAt": 1765692692322,
+      "uploadedBy": "admin",
+      "id": "card/僧侣.png"
+    },
+    "card/生成 400_400 风景照和星河照 (1).png": {
+      "tags": [],
+      "category": "card",
+      "createdAt": 1765692692363,
+      "uploadedBy": "admin",
+      "id": "card/生成 400_400 风景照和星河照 (1).png"
+    },
+    "card/生成 400_400 风景照和星河照.png": {
+      "tags": [],
+      "category": "card",
+      "createdAt": 1765692692469,
+      "uploadedBy": "admin",
+      "id": "card/生成 400_400 风景照和星河照.png"
+    }
+  },
+  "users": {
+    "admin": {
+      "username": "admin",
+      "passwordHash": "29e48ca8671a7a4c478e14103ec4793ed16c67b8b37a07ed5aadcfac559192578c813acede4575aa8fd7a7efea1470e6f21c2c11f2c934ff4afd277ceda56690",
+      "salt": "942d38f2d5bf87b6cf75203623f71c2f",
+      "role": "admin",
+      "approved": true,
+      "createdAt": 1765692232641
+    }
+  }
 }
