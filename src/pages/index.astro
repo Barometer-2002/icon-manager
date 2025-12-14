@@ -4,7 +4,7 @@ import path from 'node:path';
 
 const iconDir = path.join(process.cwd(), 'public', 'icon');
 
-let icons = [];
+let icons: string[] = [];
 if (fs.existsSync(iconDir)) {
   icons = fs
     .readdirSync(iconDir)
@@ -203,43 +203,52 @@ const parsedIcons = icons.map((filename) => {
     </div>
 
     <script>
-      const searchInput = document.getElementById('search');
+      const searchInput = document.getElementById('search') as HTMLInputElement | null;
       const grid = document.getElementById('grid');
-      const cards = Array.from(grid.children);
 
-      function match(card, q) {
-        const name = card.dataset.name.toLowerCase();
-        const cn = card.dataset.cn.toLowerCase();
-        const domain = card.dataset.domain.toLowerCase();
-        const original = card.dataset.original.toLowerCase();
-        return (
-          name.includes(q) ||
-          cn.includes(q) ||
-          domain.includes(q) ||
-          original.includes(q)
-        );
-      }
+      if (searchInput && grid) {
+        const cards = Array.from(grid.children) as HTMLElement[];
 
-      searchInput.addEventListener('input', () => {
-        const q = searchInput.value.trim().toLowerCase();
-        cards.forEach((card) => {
-          if (!q || match(card, q)) {
-            card.style.display = '';
-          } else {
-            card.style.display = 'none';
+        function match(card: HTMLElement, q: string) {
+          const name = card.dataset.name?.toLowerCase() || '';
+          const cn = card.dataset.cn?.toLowerCase() || '';
+          const domain = card.dataset.domain?.toLowerCase() || '';
+          const original = card.dataset.original?.toLowerCase() || '';
+          return (
+            name.includes(q) ||
+            cn.includes(q) ||
+            domain.includes(q) ||
+            original.includes(q)
+          );
+        }
+
+        searchInput.addEventListener('input', () => {
+          const q = searchInput.value.trim().toLowerCase();
+          cards.forEach((card) => {
+            if (!q || match(card, q)) {
+              card.style.display = '';
+            } else {
+              card.style.display = 'none';
+            }
+          });
+        });
+
+        grid.addEventListener('click', (e) => {
+          const target = e.target as HTMLElement;
+          const btn = target.closest('.btn') as HTMLElement | null;
+          
+          if (btn && btn.dataset.action === 'copy') {
+            const card = btn.closest('.card');
+            if (card) {
+              const input = card.querySelector('.path') as HTMLInputElement | null;
+              if (input) {
+                navigator.clipboard.writeText(input.value);
+                alert('已复制路径：' + input.value);
+              }
+            }
           }
         });
-      });
-
-      grid.addEventListener('click', (e) => {
-        const btn = e.target;
-        if (btn.dataset.action === 'copy') {
-          const card = btn.closest('.card');
-          const input = card.querySelector('.path');
-          navigator.clipboard.writeText(input.value);
-          alert('已复制路径：' + input.value);
-        }
-      });
+      }
     </script>
   </body>
 </html>
