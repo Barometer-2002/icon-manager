@@ -74,19 +74,20 @@ export default function IconManager() {
     const pageData = filtered.slice(start, start + limit);
 
     // 5. Map to Icon interface
-    const mappedIcons: Icon[] = pageData.map(f => {
-      // @ts-ignore
-      const meta = dbData.icons[f.relativePath] || {};
-      return {
-        id: f.relativePath,
-        name: f.name,
-        // Ensure URL starts with / for absolute path from root
-        url: '/' + f.relativePath,
-        tags: meta.tags || [],
-        mtime: f.mtime,
-        uploadedBy: meta.uploadedBy
-      };
-    });
+            const mappedIcons: Icon[] = pageData.map(f => {
+              // @ts-ignore
+              const meta = dbData.icons[f.relativePath] || {};
+              // Encode URL components to handle special characters like '+' and Chinese
+              const url = '/' + f.relativePath.split('/').map(part => encodeURIComponent(part)).join('/');
+              return {
+                id: f.relativePath,
+                name: f.name,
+                url,
+                tags: meta.tags || [],
+                mtime: f.mtime,
+                uploadedBy: meta.uploadedBy
+              };
+            });
 
     return {
       icons: mappedIcons,

@@ -50,3 +50,36 @@ if (!fs.existsSync(outputDir)) {
 
 fs.writeFileSync(OUTPUT_FILE, JSON.stringify(files, null, 2));
 console.log(`Generated file list with ${files.length} items at ${OUTPUT_FILE}`);
+
+// Update db.json with new files
+const DB_FILE = path.resolve(process.cwd(), 'db.json');
+try {
+  let db = { icons: {}, users: {} };
+  if (fs.existsSync(DB_FILE)) {
+    db = JSON.parse(fs.readFileSync(DB_FILE, 'utf-8'));
+  }
+  
+  let newCount = 0;
+  files.forEach(file => {
+    if (!db.icons[file.relativePath]) {
+      const category = file.relativePath.split('/')[0] || 'icon';
+      db.icons[file.relativePath] = {
+        id: file.relativePath,
+        tags: [],
+        category: category,
+        createdAt: Date.now(),
+        uploadedBy: 'system' // Mark as auto-discovered
+      };
+      newCount++;
+    }
+  });
+
+  if (newCount > 0) {
+    fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2));
+    console.log(`Updated db.json with ${newCount} new items.`);
+  } else {
+    console.log('db.json is up to date.');
+  }
+} catch (e) {
+  console.error('Error updating db.json:', e);
+}
