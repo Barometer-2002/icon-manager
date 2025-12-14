@@ -1,8 +1,8 @@
 import type { APIRoute } from 'astro';
 import { getIcons, getFiles } from '../../../utils/scanner';
 import { ICONS_DIR, ALLOWED_EXTENSIONS, CATEGORY_MAP } from '../../../consts';
-import path from 'path';
-import fs from 'fs/promises';
+import path from 'node:path';
+import fs from 'node:fs/promises';
 
 import { getSessionUser } from '../../../utils/auth';
 import { updateIconMeta } from '../../../utils/db';

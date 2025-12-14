@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 import { ICONS_DIR } from '../../../consts';
 
 export const GET: APIRoute = async ({ params, request }) => {

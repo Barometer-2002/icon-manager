@@ -1,5 +1,5 @@
-import fs from 'fs/promises';
-import { existsSync } from 'fs';
+import fs from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 import { DB_FILE } from '../consts';
 
 export interface IconMeta {

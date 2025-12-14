@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
-import path from 'path';
-import fs from 'fs/promises';
+import path from 'node:path';
+import fs from 'node:fs/promises';
 import { ICONS_DIR } from '../../../consts';
 import { updateIconMeta } from '../../../utils/db';
 import { getFiles } from '../../../utils/scanner';

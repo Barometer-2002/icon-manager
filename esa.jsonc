@@ -1,5 +1,13 @@
 {
   "entry": "dist/server/entry.mjs",
   "assets": "dist/client",
-  "platform": "node"
+  "platform": "node",
+  "external": [
+    "fs",
+    "path",
+    "node:fs",
+    "node:path",
+    "fs/promises",
+    "node:fs/promises"
+  ]
 }

@@ -1,5 +1,5 @@
-import path from 'path';
-import fs from 'fs';
+import path from 'node:path';
+import fs from 'node:fs';
 
 export const ICONS_DIR = path.resolve(process.cwd(), 'public');
 export const DB_FILE = path.resolve(process.cwd(), 'db.json');
