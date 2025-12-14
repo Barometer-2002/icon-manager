@@ -1,7 +1,6 @@
-import fs from 'node:fs';
-import path from 'node:path';
-import { ICONS_DIR, ALLOWED_EXTENSIONS, CATEGORY_MAP } from '../consts';
+import { CATEGORY_MAP } from '../consts';
 import { getDB } from './db';
+import fileList from '../generated/file-list.json';
 
 interface CachedFile {
   relativePath: string;
@@ -9,51 +8,9 @@ interface CachedFile {
   mtime: number;
 }
 
-let fileCache: CachedFile[] | null = null;
-let lastScanTime = 0;
-const CACHE_DURATION = 60 * 1000; // 1 minute cache
-
-function scanDirectory(dir: string, rootDir: string): CachedFile[] {
-  let results: CachedFile[] = [];
-  try {
-    const list = fs.readdirSync(dir);
-    for (const file of list) {
-      const filePath = path.join(dir, file);
-      const relativePath = path.relative(rootDir, filePath);
-      
-      // Ignore hidden files and the project directory itself
-      if (file.startsWith('.') || file === 'icon-manager' || file === 'node_modules' || file === '.git') {
-        continue;
-      }
-
-      const stat = fs.statSync(filePath);
-      if (stat && stat.isDirectory()) {
-        results = results.concat(scanDirectory(filePath, rootDir));
-      } else {
-        const ext = path.extname(file).toLowerCase();
-        if (ALLOWED_EXTENSIONS.includes(ext)) {
-          results.push({
-            relativePath: relativePath.replace(/\\/g, '/'),
-            name: file,
-            mtime: stat.mtimeMs
-          });
-        }
-      }
-    }
-  } catch (e) {
-    console.error(`Error scanning directory ${dir}:`, e);
-  }
-  return results;
-}
-
 export async function getFiles(forceRefresh = false) {
-  const now = Date.now();
-  if (!fileCache || forceRefresh || (now - lastScanTime > CACHE_DURATION)) {
-    console.log('Scanning files...');
-    fileCache = scanDirectory(ICONS_DIR, ICONS_DIR);
-    lastScanTime = now;
-  }
-  return fileCache;
+  // forceRefresh is ignored in static mode
+  return fileList as CachedFile[];
 }
 
 export async function getIcons(page = 1, limit = 50, search = '', category = '') {
@@ -61,6 +18,7 @@ export async function getIcons(page = 1, limit = 50, search = '', category = '')
   const db = await getDB();
 
   let filtered = files;
+
 
   // Filter by category (directory)
   if (category) {

@@ -1,6 +1,4 @@
-import fs from 'node:fs/promises';
-import { existsSync } from 'node:fs';
-import { DB_FILE } from '../consts';
+import dbData from '../../db.json';
 
 export interface IconMeta {
   id: string;
@@ -26,27 +24,22 @@ export interface DBData {
   users: Record<string, User>;
 }
 
-const defaultData: DBData = { icons: {}, users: {} };
+// In read-only mode, we use the imported JSON directly
+// Note: updates will not persist across re-deployments
+let memoryDB: DBData = {
+  icons: (dbData.icons || {}) as Record<string, IconMeta>,
+  users: (dbData.users || {}) as Record<string, User>
+};
 
 export async function getDB(): Promise<DBData> {
-  if (!existsSync(DB_FILE)) {
-    await fs.writeFile(DB_FILE, JSON.stringify(defaultData, null, 2));
-    return defaultData;
-  }
-  const content = await fs.readFile(DB_FILE, 'utf-8');
-  try {
-    const parsed = JSON.parse(content) as Partial<DBData>;
-    return {
-      icons: parsed.icons || {},
-      users: parsed.users || {},
-    };
-  } catch {
-    return defaultData;
-  }
+  return memoryDB;
 }
 
 export async function saveDB(data: DBData) {
-  await fs.writeFile(DB_FILE, JSON.stringify(data, null, 2));
+  // In read-only mode, we just update memory
+  // This will reset on server restart (cold start)
+  memoryDB = data;
+  console.warn('DB update ignored in read-only mode');
 }
 
 export async function getIconMeta(id: string): Promise<IconMeta | undefined> {
