@@ -1,6 +1,13 @@
 import { defineConfig } from 'astro/config';
 
 export default defineConfig({
-  output: 'static'
+  output: 'static',
+  vite: {
+    server: {
+      fs: {
+        strict: false,
+      },
+    },
+  },
 });
 
