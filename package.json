@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "astro dev",
+    "dev": "node scripts/generate-icon-list.mjs && astro dev",
     "start": "astro dev",
-    "build": "astro build",
+    "build": "node scripts/generate-icon-list.mjs && astro build",
     "preview": "astro preview",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

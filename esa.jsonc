@@ -1,0 +1,8 @@
+{
+  "name": "icon-manager",
+  "buildCommand": "npm run build",
+  "assets": {
+    "directory": "./dist",
+    "notFoundStrategy": "singlePageApplication"
+  }
+}
