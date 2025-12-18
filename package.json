@@ -6,10 +6,12 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "pack-icons": "node scripts/pack-icons.js"
   },
   "dependencies": {
     "astro": "^5.0.0",
-    "node-fetch": "^3.3.2"
+    "node-fetch": "^3.3.2",
+    "adm-zip": "^0.5.9"
   }
 }

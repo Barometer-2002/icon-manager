@@ -35,8 +35,13 @@ export const GET: APIRoute = async ({ request }) => {
       cnName,
       domain,
       filename,
-      url: `/icon/${filename}`, // No encoding needed here as JSON will be parsed programmatically, but safer to keep clean
-      downloadUrl: `/icon/${filename}`
+      // Serve icons via API that can read from ZIP or fallback to public/icon
+      url: process.env.ICON_BASE_URL
+        ? `${process.env.ICON_BASE_URL.replace(/\/+$/,'')}/${encodeURIComponent(filename)}`
+        : `/api/icon/${encodeURIComponent(filename)}`,
+      downloadUrl: process.env.ICON_BASE_URL
+        ? `${process.env.ICON_BASE_URL.replace(/\/+$/,'')}/${encodeURIComponent(filename)}`
+        : `/api/icon/${encodeURIComponent(filename)}`
     };
   });
 
